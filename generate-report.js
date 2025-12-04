@@ -48,7 +48,19 @@ async function generateReport() {
   console.log('📖 Добавляем README.md...');
   const readmePath = path.join(ROOT_DIR, 'README.md');
   if (fs.existsSync(readmePath)) {
-    combinedMarkdown += fs.readFileSync(readmePath, 'utf-8');
+    let readmeContent = fs.readFileSync(readmePath, 'utf-8');
+
+    // CHANGE: Заменяем относительные ссылки на anchor-ссылки для внутренней навигации в PDF
+    // WHY: Пользователь запросил "ссылки внутри делай ссылками внутри документа"
+    readmeContent = readmeContent
+      .replace(/\[([^\]]+)\]\(profiles\/nadya\.md\)/g, '[$1](#profile-nadya)')
+      .replace(/\[([^\]]+)\]\(profiles\/sasha\.md\)/g, '[$1](#profile-sasha)')
+      .replace(/\[([^\]]+)\]\(situations\/([^)]+)\.md\)/g, (match, text, filename) => {
+        const anchorId = filename.toLowerCase().replace(/[^a-z0-9а-я]+/g, '-');
+        return `[${text}](#${anchorId})`;
+      });
+
+    combinedMarkdown += readmeContent;
   } else {
     console.warn('⚠️ README.md не найден');
   }
@@ -63,9 +75,10 @@ async function generateReport() {
 
     for (const file of situationFiles) {
       const filename = path.basename(file);
+      const anchorId = filename.replace('.md', '').toLowerCase().replace(/[^a-z0-9а-я]+/g, '-');
       console.log(`  ✓ ${filename}`);
       const content = fs.readFileSync(file, 'utf-8');
-      combinedMarkdown += `\n\n## ${filename.replace('.md', '')}\n\n${content}`;
+      combinedMarkdown += `\n\n<a id="${anchorId}"></a>\n## ${filename.replace('.md', '')}\n\n${content}`;
     }
   } else {
     console.log('  ℹ️ Ситуации не найдены');
@@ -81,9 +94,11 @@ async function generateReport() {
 
     for (const file of profileFiles) {
       const filename = path.basename(file);
+      const profileName = filename.replace('.md', '');
+      const anchorId = `profile-${profileName.toLowerCase()}`;
       console.log(`  ✓ ${filename}`);
       const content = fs.readFileSync(file, 'utf-8');
-      combinedMarkdown += `\n\n## Профиль: ${filename.replace('.md', '')}\n\n${content}`;
+      combinedMarkdown += `\n\n<a id="${anchorId}"></a>\n## Профиль: ${profileName}\n\n${content}`;
     }
   } else {
     console.warn('  ⚠️ Профили не найдены');
@@ -114,10 +129,11 @@ async function generateReport() {
           footerTemplate: '<div style="font-size: 10px; text-align: center; width: 100%;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>'
         },
         css: `
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
-h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 30px; }
-h2 { color: #34495e; border-bottom: 2px solid #95a5a6; padding-bottom: 8px; margin-top: 25px; }
-h3 { color: #7f8c8d; margin-top: 20px; }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Color Emoji', sans-serif; line-height: 1.6; color: #333; }
+h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 30px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Color Emoji', sans-serif; }
+h2 { color: #34495e; border-bottom: 2px solid #95a5a6; padding-bottom: 8px; margin-top: 25px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Color Emoji', sans-serif; }
+h3 { color: #7f8c8d; margin-top: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Color Emoji', sans-serif; }
 code { background-color: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
 pre { background-color: #f8f8f8; padding: 15px; border-left: 4px solid #3498db; overflow-x: auto; }
 blockquote { border-left: 4px solid #e74c3c; padding-left: 15px; color: #555; font-style: italic; margin: 15px 0; }
