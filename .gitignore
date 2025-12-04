@@ -1,0 +1,11 @@
+# CHANGE: Gitignore для uutik проекта
+# WHY: Исключить сгенерированные файлы и зависимости из Git
+
+# PDF отчёты
+*.pdf
+
+# Node modules
+node_modules/
+
+# npm lock
+package-lock.json

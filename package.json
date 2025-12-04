@@ -1,0 +1,24 @@
+{
+  "name": "uutik",
+  "version": "1.0.0",
+  "description": "**Мы вместе. Снова. После 3 лет.**",
+  "main": "index.js",
+  "scripts": {
+    "generate-pdf": "node generate-report.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noxonsu/uutik.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/noxonsu/uutik/issues"
+  },
+  "homepage": "https://github.com/noxonsu/uutik#readme",
+  "dependencies": {
+    "md-to-pdf": "^5.2.5"
+  }
+}
